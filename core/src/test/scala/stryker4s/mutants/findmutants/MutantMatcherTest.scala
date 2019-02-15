@@ -371,6 +371,23 @@ class MutantMatcherTest extends Stryker4sSuite with TreeEquality {
       )
     }
 
+//    it("should match on triple quoted strings 1111111") {
+//      val interpolated =
+//        Term.Interpolate(q"s", List(Lit.String("interpolate $0 "), Lit.String("")), List(q"bar"))
+//      val tree = q"def foo = $interpolated"
+//      val emptyStringInterpolate = Term.Interpolate(q"s", List(Lit.String("")), Nil)
+//
+//      println(interpolated.syntax)
+//
+//      interpolated.syntax should equal("s\"interpolate $$0 $foo\"")
+//      expectMutations(
+//        sut.matchStringLiteral,
+//        tree,
+//        interpolated,
+//        emptyStringInterpolate
+//      )
+//    }
+
     it("should match once on interpolated strings with multiple parts") {
       val interpolated =
         Term.Interpolate(q"s",
@@ -440,6 +457,18 @@ class MutantMatcherTest extends Stryker4sSuite with TreeEquality {
       val result: Seq[Mutant] = (tree collect sut.allMatchers).flatten.flatten
 
       result.map(_.original) should not contain q"isEmpty"
+    }
+
+    it("should not match .Select") {
+      val tree = q"(new scala.util.Random).nextInt(3) + 1"
+
+      println(tree.syntax)
+
+//      tree.syntax should equal("(new scala.util.Random).nextInt(3)")
+
+      val result = tree collect sut.allMatchers
+
+      result should be(empty)
     }
   }
 }

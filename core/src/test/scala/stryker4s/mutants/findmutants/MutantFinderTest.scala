@@ -66,6 +66,15 @@ class MutantFinderTest extends Stryker4sSuite with TreeEquality with LogMatchers
       result should be(empty)
     }
 
+    it("should return empty list when given source has no possible mutations #2") {
+      val sut = new MutantFinder(new MutantMatcher)
+      val source = source"object Foo { (new scala.util.Random).nextInt(3) }"
+
+      val result = sut.findMutants(source)._1
+
+      result should be(empty)
+    }
+
     it("should contain a mutant when given source has a possible mutation") {
       val sut = new MutantFinder(new MutantMatcher)
       val source =

@@ -46,6 +46,49 @@ class MutatorTest extends Stryker4sSuite with TreeEquality with LogMatchers {
                        |}""".stripMargin.parse[Source].get
       result.loneElement.tree should equal(expected)
     }
+
+    it("should return a single Tree with changed pattern match #2") {
+      implicit val conf: Config = Config()
+      val files = new TestSourceCollector(Seq(FileUtil.getResource("scalaFiles/simpleFile3.scala")))
+        .collectFilesToMutate()
+
+      val sut = new Mutator(
+        new MutantFinder(new MutantMatcher),
+        new StatementTransformer,
+        new MatchBuilder(ActiveMutationContext.sysProps)
+      )
+
+      val result = sut.mutate(files)
+
+      val expected = """object Foo {
+                       |  def bar = sys.props.get("ACTIVE_MUTATION") match {
+                       |    case Some("0") =>
+                       |      15 >= 14
+                       |    case Some("1") =>
+                       |      15 < 14
+                       |    case Some("2") =>
+                       |      15 == 14
+                       |    case _ =>
+                       |      15 > 14
+                       |  }
+                       |  val foo = (new scala.util.Random).nextInt(3) + 1
+                       |  def foobar = sys.props.get("ACTIVE_MUTATION") match {
+                       |    case Some("3") =>
+                       |      s""
+                       |    case _ =>
+                       |      s"${{
+                       |        bar
+                       |      }}foo"
+                       |  }
+                       |  def barfoo = sys.props.get("ACTIVE_MUTATION") match {
+                       |    case Some("4") =>
+                       |      s""
+                       |    case _ =>
+                       |      s"$$0"
+                       |  }
+                       |}""".stripMargin.parse[Source].get.syntax
+      result.loneElement.tree.syntax should equal(expected)
+    }
   }
   describe("logs") {
     it("should log the amount of mutants found") {
